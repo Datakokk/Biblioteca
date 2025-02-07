@@ -1,0 +1,11 @@
+package com.biblioteca.modelo;
+
+public class Usuario {
+	private int idUsua;
+	private String nombre;
+	private String email;
+	private String telefono;
+	private String rol; // 'administrador o usuario'
+	private String password;
+	
+}

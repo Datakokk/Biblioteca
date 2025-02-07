@@ -1,0 +1,38 @@
+# Archivos y carpetas de Eclipse
+.classpath
+.project
+.settings/
+
+# Archivos de Maven
+target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/timing.properties
+.mvn/wrapper/maven-wrapper.jar
+
+# Archivos de compilación
+bin/
+*.class
+
+# Archivos de configuración del IDE
+.idea/
+*.iml
+
+# Archivos de WindowBuilder
+wbp-meta/
+
+# Archivos sensibles
+*.log
+*.env
+*.properties
+config.properties
+
+# Conexiones y credenciales
+aws-credentials.json
+mysql-credentials.txt
+
