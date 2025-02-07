@@ -1,0 +1,23 @@
+package com.biblioteca.servicio;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+
+import com.biblioteca.dao.UsuarioDAO;
+import com.biblioteca.modelo.Usuario;
+
+public class UsuarioServicio {
+
+	private UsuarioDAO usuarioDAO;
+	
+	public UsuarioServicio(Connection conexion) {
+		this.usuarioDAO = new UsuarioDAO(conexion);
+	}
+	
+	public void registrarUsuario(Usuario usuario) throws SQLException {
+		if(usuarioDAO.obtnerUsuarioPorEmail(usuario.getEmail()) != null) {
+			throw new SQLException("El email ya esta registrado");
+		}
+		usuarioDAO.agregarUsuario(usuario);
+	}
+}
