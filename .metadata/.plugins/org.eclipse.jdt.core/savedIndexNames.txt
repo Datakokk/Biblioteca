@@ -18,7 +18,6 @@ INDEX VERSION 1.134+/home/datakokk/DAM/Biblioteca/.metadata/.plugins/org.eclipse
 1427028928.index
 1246032130.index
 4159493441.index
-900586112.index
 1867792828.index
 1384554409.index
 1626549554.index

@@ -16,14 +16,14 @@ public class UsuarioServicio {
 	}
 	
 	public void registrarUsuario(Usuario usuario) throws SQLException {
-		if(usuarioDAO.obtnerUsuarioPorEmail(usuario.getEmail()) != null) {
+		if(usuarioDAO.obtenerUsuarioPorEmail(usuario.getEmail()) != null) {
 			throw new SQLException("El email ya esta registrado");
 		}
 		usuarioDAO.agregarUsuario(usuario);
 	}
 	
 	public Usuario obtenerUsuarioEmail(String email) throws SQLException {
-		return usuarioDAO.obtnerUsuarioPorEmail(email);
+		return usuarioDAO.obtenerUsuarioPorEmail(email);
 	}
 	
 	public List<Usuario> listarUsuarios() throws SQLException{

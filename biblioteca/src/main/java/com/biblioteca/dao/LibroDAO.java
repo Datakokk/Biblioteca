@@ -43,7 +43,7 @@ public class LibroDAO {
 	
 	//  Eliminar un libro (verificando que no esta prestado)
 	public void eliminarLibro(int idLibro) throws SQLException {
-		String sql = "SELECT * FROM libros WHERE id_libro = ? AND estado = 'disponible";
+		String sql = "SELECT * FROM libros WHERE id_libro = ? AND estado = 'disponible'";
 		
 		try(PreparedStatement ps = conexion.prepareStatement(sql)){
 			ps.setInt(1, idLibro);

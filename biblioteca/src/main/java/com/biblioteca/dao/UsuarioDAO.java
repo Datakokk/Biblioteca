@@ -25,7 +25,7 @@ public class UsuarioDAO {
 		}
 	}
 	
-	public Usuario obtnerUsuarioPorEmail(String email) throws SQLException {
+	public Usuario obtenerUsuarioPorEmail(String email) throws SQLException {
 		String sql = "SELECT * FROM usuarios WHERE email = ?";
 		try(PreparedStatement ps = conexion.prepareStatement(sql)){
 			ps.setString(1, email);

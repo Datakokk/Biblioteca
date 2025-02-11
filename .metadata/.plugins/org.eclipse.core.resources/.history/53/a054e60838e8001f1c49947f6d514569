@@ -1,0 +1,13 @@
+package com.biblioteca.util;
+
+import java.security.MessageDigest;
+
+public class encriptarPassword {
+	public static String name() {
+		
+	}
+	try {
+		MessageDigest md = MessageDigest.getInstance("SHA-256");
+		byte[] hash = md.digest(password.getBytes());
+	}
+}

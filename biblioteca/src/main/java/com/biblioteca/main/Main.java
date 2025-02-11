@@ -1,11 +1,117 @@
 package com.biblioteca.main;
 
+import com.biblioteca.modelo.*;
+import com.biblioteca.servicio.*;
+import com.biblioteca.util.ConexionJDBC;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+import java.util.Scanner;
+
 public class Main {
+    public static void main(String[] args) {
+    	System.out.println("📚 Sistema de Biblioteca Iniciado ✅");
+        try (Connection conexion = ConexionJDBC.obtenerConexion();
+             Scanner scanner = new Scanner(System.in)) {
 
-	public static void main(String[] args) {
-		// TODO Auto-generated method stub
-        System.out.println("📚 Sistema de Biblioteca Iniciado ✅");
+            UsuarioServicio usuarioServicio = new UsuarioServicio(conexion);
+            LibroServicio libroServicio = new LibroServicio(conexion);
+            PrestamoServicio prestamoServicio = new PrestamoServicio(new com.biblioteca.dao.PrestamoDAO(conexion));
+            ReservaServicio reservaServicio = new ReservaServicio(new com.biblioteca.dao.ReservaDAO(conexion));
 
-	}
+            while (true) {
+                System.out.println("\nSistema de Gestión de Biblioteca");
+                System.out.println("1. Agregar usuario");
+                System.out.println("2. Agregar libro");
+                System.out.println("3. Registrar préstamo");
+                System.out.println("4. Listar libros");
+                System.out.println("5. Salir");
+                System.out.print("Seleccione una opción: ");
+                
+                int opcion = scanner.nextInt();
+                scanner.nextLine();
 
+                switch (opcion) {
+                    case 1:
+                        System.out.print("Ingrese nombre: ");
+                        String nombre = scanner.nextLine();
+                        System.out.print("Ingrese email: ");
+                        String email = scanner.nextLine();
+                        System.out.print("Ingrese teléfono: ");
+                        String telefono = scanner.nextLine();
+                        System.out.print("Ingrese rol (admin/usuario): ");
+                        String rol = scanner.nextLine();
+                        System.out.print("Ingrese contraseña: ");
+                        String password = scanner.nextLine();
+                        
+                        Usuario usuario = new Usuario();
+                        usuario.setNombre(nombre);
+                        usuario.setEmail(email);
+                        usuario.setTelefono(telefono);
+                        usuario.setRol(rol);
+                        usuario.setPassword(password);
+                        
+                        usuarioServicio.registrarUsuario(usuario);
+                        System.out.println("Usuario registrado con éxito!");
+                        break;
+                    
+                    case 2:
+                        System.out.print("Ingrese título: ");
+                        String titulo = scanner.nextLine();
+                        System.out.print("Ingrese autor: ");
+                        String autor = scanner.nextLine();
+                        System.out.print("Ingrese género: ");
+                        String genero = scanner.nextLine();
+                        System.out.print("Ingrese estado (disponible/prestado): ");
+                        String estado = scanner.nextLine();
+                        
+                        Libro libro = new Libro();
+                        libro.setTitulo(titulo);
+                        libro.setAutor(autor);
+                        libro.setGenero(genero);
+                        libro.setEstado(estado);
+                        
+                        libroServicio.agregarLibro(libro);
+                        System.out.println("Libro agregado con éxito!");
+                        break;
+                    
+                    case 3:
+                        System.out.print("Ingrese ID del usuario: ");
+                        int idUsuario = scanner.nextInt();
+                        System.out.print("Ingrese ID del libro: ");
+                        int idLibro = scanner.nextInt();
+                        scanner.nextLine();
+                        
+                        Prestamo prestamo = new Prestamo();
+                        prestamo.setIdUsuario(idUsuario);
+                        prestamo.setIdLibro(idLibro);
+                        prestamo.setFechaPrestamo(new java.util.Date());
+                        
+                        prestamoServicio.registrarPrestamo(prestamo);
+                        System.out.println("Préstamo registrado con éxito!");
+                        break;
+                    
+                    case 4:
+                        List<Libro> libros = libroServicio.listarLibros();
+                        System.out.println("Lista de libros:");
+                        for (Libro l : libros) {
+                            System.out.println(l.getIdLibro() + " - " + l.getTitulo() + " de " + l.getAutor() + " (" + l.getEstado() + ")");
+                        }
+                        break;
+                    
+                    case 5:
+                        System.out.println("Saliendo del sistema...");
+                        return;
+                    
+                    default:
+                        System.out.println("Opción inválida. Intente nuevamente.");
+                        break;
+                }
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+            System.out.println("Error en la conexión con la base de datos");
+        }
+    }
 }

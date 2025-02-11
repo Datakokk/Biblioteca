@@ -9,10 +9,6 @@
     <fullyQualifiedTypeName name="com.biblioteca.gui.MainFrame"/>
     <fullyQualifiedTypeName name="java.sql.SQLClientInfoException"/>
     <fullyQualifiedTypeName name="java.lang.StackOverflowError"/>
-    <fullyQualifiedTypeName name="com.biblioteca.modelo.Prestamo"/>
-    <fullyQualifiedTypeName name="com.biblioteca.dao.PrestamoDAO"/>
-    <fullyQualifiedTypeName name="java.sql.Date"/>
-    <fullyQualifiedTypeName name="com.biblioteca.modelo.Reserva"/>
     <fullyQualifiedTypeName name="com.biblioteca.dao.PrestamosExpressDAO"/>
     <fullyQualifiedTypeName name="java.lang.String"/>
     <fullyQualifiedTypeName name="com.biblioteca.modelo.PrestamosExpress"/>
@@ -21,12 +17,21 @@
     <fullyQualifiedTypeName name="java.sql.Statement"/>
     <fullyQualifiedTypeName name="java.sql.ResultSet"/>
     <fullyQualifiedTypeName name="com.biblioteca.modelo.Reporte"/>
-    <fullyQualifiedTypeName name="java.util.List"/>
     <fullyQualifiedTypeName name="java.util.ArrayList"/>
     <fullyQualifiedTypeName name="com.biblioteca.dao.UsuarioDAO"/>
-    <fullyQualifiedTypeName name="java.sql.SQLException"/>
     <fullyQualifiedTypeName name="com.biblioteca.servicio.LibroServicio"/>
     <fullyQualifiedTypeName name="java.sql.Connection"/>
     <fullyQualifiedTypeName name="com.biblioteca.dao.LibroDAO"/>
     <fullyQualifiedTypeName name="com.biblioteca.modelo.Libro"/>
+    <fullyQualifiedTypeName name="com.biblioteca.servicio.PrestamoServicio"/>
+    <fullyQualifiedTypeName name="com.biblioteca.dao.PrestamoDAO"/>
+    <fullyQualifiedTypeName name="com.biblioteca.dao.ReservaDAO"/>
+    <fullyQualifiedTypeName name="java.util.List"/>
+    <fullyQualifiedTypeName name="java.sql.SQLException"/>
+    <fullyQualifiedTypeName name="java.sql.Date"/>
+    <fullyQualifiedTypeName name="java.lang.System"/>
+    <fullyQualifiedTypeName name="com.biblioteca.modelo.Prestamo"/>
+    <fullyQualifiedTypeName name="com.biblioteca.modelo.Reserva"/>
+    <fullyQualifiedTypeName name="java.security.MessageDigest"/>
+    <fullyQualifiedTypeName name="java.net.PasswordAuthentication"/>
 </qualifiedTypeNameHistroy>
