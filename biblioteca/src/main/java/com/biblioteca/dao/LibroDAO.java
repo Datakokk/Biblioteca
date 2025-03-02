@@ -43,17 +43,31 @@ public class LibroDAO {
 	
 	//  Eliminar un libro (verificando que no esta prestado)
 	public void eliminarLibro(int idLibro) throws SQLException {
-		String sql = "SELECT * FROM libros WHERE id_libro = ? AND estado = 'disponible'";
-		
-		try(PreparedStatement ps = conexion.prepareStatement(sql)){
-			ps.setInt(1, idLibro);
-			
-			int filasAfectadas = ps.executeUpdate();
-			if(filasAfectadas == 0) {
-				throw new SQLException("No se puede eliminar el libro, Verifique que no esté prestado.");
-			}
-		}
+	    // Primero, verificar si el libro está disponible
+	    String verificarSql = "SELECT * FROM libros WHERE id_libro = ? AND estado = 'disponible'";
+	    
+	    try (PreparedStatement psVerificar = conexion.prepareStatement(verificarSql)) {
+	        psVerificar.setInt(1, idLibro);
+	        try (ResultSet rs = psVerificar.executeQuery()) {
+	            if (!rs.next()) {
+	                throw new SQLException("No se puede eliminar el libro, verifique que no esté prestado.");
+	            }
+	        }
+	    }
+
+	    // Si el libro está disponible, proceder con la eliminación
+	    String eliminarSql = "DELETE FROM libros WHERE id_libro = ?";
+	    
+	    try (PreparedStatement psEliminar = conexion.prepareStatement(eliminarSql)) {
+	        psEliminar.setInt(1, idLibro);
+	        int filasAfectadas = psEliminar.executeUpdate();
+	        
+	        if (filasAfectadas == 0) {
+	            throw new SQLException("No se encontró el libro para eliminar.");
+	        }
+	    }
 	}
+
 	
 	// Buscar libro por ID
 	public Libro obtenerLibroPorID(int idLibro) throws SQLException {

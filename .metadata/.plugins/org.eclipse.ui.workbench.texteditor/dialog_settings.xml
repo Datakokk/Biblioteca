@@ -3,6 +3,14 @@
 	<item key="hasShownOverlayPopupBefore" value="true"/>
 	<item key="replaceBarOpen" value="false"/>
 	<list key="searchhistory">
+		<item value="Connection"/>
+		<item value="admin"/>
 		<item value="Libro"/>
 	</list>
+	<section name="org.eclipse.ui.texteditor.FindReplaceDialog">
+		<item key="selection" value="String hashedPassword = BCrypt.hashpw(usuario.getPassword(), BCrypt.gensalt());"/>
+		<list key="findhistory">
+			<item value="String hashedPassword = BCrypt.hashpw(usuario.getPassword(), BCrypt.gensalt());"/>
+		</list>
+	</section>
 </section>

@@ -1,0 +1,138 @@
+package com.biblioteca.gui;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import com.biblioteca.servicio.UsuarioServicio;
+import com.biblioteca.util.ConexionJDBC;
+import com.biblioteca.servicio.LibroServicio;
+import com.biblioteca.servicio.PrestamoServicio;
+import com.biblioteca.servicio.ReservaServicio;
+import com.biblioteca.modelo.Usuario;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.SQLException;
+
+public class MainFrame extends JFrame {
+    private CardLayout cardLayout;
+    private JPanel mainPanel;
+    private UsuarioServicio usuarioServicio;
+    private LibroServicio libroServicio;
+    private PrestamoServicio prestamoServicio;
+    private ReservaServicio reservaServicio;
+
+    public MainFrame(Connection conexion) {
+        this.usuarioServicio = new UsuarioServicio(conexion);
+        this.libroServicio = new LibroServicio(conexion);
+        this.prestamoServicio = new PrestamoServicio(new com.biblioteca.dao.PrestamoDAO(conexion));
+        this.reservaServicio = new ReservaServicio(new com.biblioteca.dao.ReservaDAO(conexion));
+
+        setTitle("Gestión de Biblioteca");
+        setSize(600, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+
+        cardLayout = new CardLayout();
+        mainPanel = new JPanel(cardLayout);
+
+        mainPanel.add(crearPanelLogin(), "login");
+        mainPanel.add(new PanelLibros(libroServicio), "panelLibros");
+        mainPanel.add(new PanelPrestamos(prestamoServicio), "panelPrestamos");
+        mainPanel.add(new PanelReservas(reservaServicio), "panelReservas");
+
+        add(mainPanel);
+
+        cardLayout.show(mainPanel, "login");
+    }
+
+    private JPanel crearPanelLogin() {
+        JPanel panel = new JPanel(new GridBagLayout());
+        GridBagConstraints gbc = new GridBagConstraints();
+
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.WEST;
+        panel.add(new JLabel("Email:"), gbc);
+
+        gbc.gridx = 1;
+        JTextField txtEmail = new JTextField(15);
+        panel.add(txtEmail, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 1;
+        panel.add(new JLabel("Contraseña:"), gbc);
+
+        gbc.gridx = 1;
+        JPasswordField txtPassword = new JPasswordField(15);
+        panel.add(txtPassword, gbc);
+
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        gbc.gridwidth = 2;
+        gbc.anchor = GridBagConstraints.CENTER;
+        JButton btnLogin = new JButton("Iniciar Sesión");
+        panel.add(btnLogin, gbc);
+
+        btnLogin.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String email = txtEmail.getText();
+                String password = new String(txtPassword.getPassword());
+
+                try {
+                    Usuario usuario = usuarioServicio.autenticarUsuario(email, password);
+                    if (usuario != null) {
+                        JOptionPane.showMessageDialog(null, "Bienvenido " + usuario.getNombre());
+                        mostrarMenu(usuario.getRol());
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Credenciales incorrectas", "Error", JOptionPane.ERROR_MESSAGE);
+                    }
+                } catch (Exception ex) {
+                    ex.printStackTrace();
+                }
+            }
+        });
+
+        return panel;
+    }
+
+    private void mostrarMenu(String rol) {
+        JPanel menuPanel = new JPanel(new GridLayout(0, 1, 10, 10));
+        menuPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 20));
+
+        JLabel lblTitulo = new JLabel("Menú Principal - Rol: " + rol, SwingConstants.CENTER);
+        menuPanel.add(lblTitulo);
+
+        JButton btnLibros = new JButton("Gestión de Libros");
+        JButton btnPrestamos = new JButton("Gestión de Préstamos");
+        JButton btnReservas = new JButton("Gestión de Reservas");
+        JButton btnReportes = new JButton("Reportes");
+
+        btnLibros.addActionListener(e -> cardLayout.show(mainPanel, "panelLibros"));
+        btnPrestamos.addActionListener(e -> cardLayout.show(mainPanel, "panelPrestamos"));
+        btnReservas.addActionListener(e -> cardLayout.show(mainPanel, "panelReservas"));
+        
+        menuPanel.add(btnLibros);
+        menuPanel.add(btnPrestamos);
+        menuPanel.add(btnReservas);
+        menuPanel.add(btnReportes);
+
+        mainPanel.add(menuPanel, "menu");
+        cardLayout.show(mainPanel, "menu");
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            try {
+                Connection conexion = ConexionJDBC.obtenerConexion();
+                MainFrame frame = new MainFrame(conexion);
+                frame.setVisible(true);
+            } catch (SQLException e) {
+                e.printStackTrace();
+                JOptionPane.showMessageDialog(null, "Error al conectar con la base de datos: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        });
+    }
+}

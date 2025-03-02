@@ -1,0 +1,146 @@
+package com.biblioteca.gui;
+
+import com.biblioteca.dao.PrestamoDAO;
+import com.biblioteca.modelo.Libro;
+import com.biblioteca.modelo.Prestamo;
+import com.biblioteca.modelo.Usuario;
+import com.biblioteca.servicio.LibroServicio;
+import com.biblioteca.servicio.PrestamoServicio;
+import com.biblioteca.util.ConexionJDBC;
+
+import javax.swing.*;
+import java.awt.*;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+
+public class UsuarioFrame extends JFrame {
+    private Usuario usuario;
+    private LibroServicio libroServicio;
+    private PrestamoServicio prestamoServicio;
+
+    // Constructor que recibe un Usuario autenticado
+    public UsuarioFrame(Usuario usuario) {
+        this.usuario = usuario;
+        setTitle("Panel de Usuario - Biblioteca");
+        setSize(600, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
+
+        // Conexión a la base de datos
+        try {
+            Connection conexion = ConexionJDBC.obtenerConexion();
+            libroServicio = new LibroServicio(conexion);
+            prestamoServicio = new PrestamoServicio(new PrestamoDAO(conexion));
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al conectar con la base de datos", "Error", JOptionPane.ERROR_MESSAGE);
+            System.exit(1);
+        }
+
+        // Barra de menú
+        JMenuBar menuBar = new JMenuBar();
+
+        // Menú de libros
+        JMenu librosMenu = new JMenu("Libros");
+        JMenuItem listarLibros = new JMenuItem("Ver Libros Disponibles");
+        JMenuItem prestarLibro = new JMenuItem("Realizar Préstamo");
+        JMenuItem devolverLibro = new JMenuItem("Devolver Libro");
+        JMenuItem verPrestamos = new JMenuItem("Ver Mis Préstamos");
+
+        librosMenu.add(listarLibros);
+        librosMenu.add(prestarLibro);
+        librosMenu.add(devolverLibro);
+        librosMenu.add(verPrestamos);
+
+        // Menú de sesión
+        JMenu sesionMenu = new JMenu("Sesión");
+        JMenuItem cerrarSesion = new JMenuItem("Cerrar Sesión");
+        sesionMenu.add(cerrarSesion);
+
+        // Agregar menús a la barra
+        menuBar.add(librosMenu);
+        menuBar.add(sesionMenu);
+        setJMenuBar(menuBar);
+
+        // Acción para cerrar sesión
+        cerrarSesion.addActionListener(e -> {
+            dispose();
+            new LoginFrame().setVisible(true);
+        });
+
+        // Acciones de los botones
+        listarLibros.addActionListener(e -> listarLibros());
+        prestarLibro.addActionListener(e -> realizarPrestamo());
+        devolverLibro.addActionListener(e -> devolverLibro());
+        verPrestamos.addActionListener(e -> verPrestamosActivos());
+
+        // Mensaje de bienvenida
+        JLabel bienvenida = new JLabel("Bienvenido, " + usuario.getNombre(), SwingConstants.CENTER);
+        add(bienvenida, BorderLayout.CENTER);
+    }
+
+    // Método para listar libros disponibles
+    private void listarLibros() {
+        try {
+            List<Libro> libros = libroServicio.listarLibros();
+            StringBuilder listaLibros = new StringBuilder("📚 Libros disponibles:\n");
+            for (Libro l : libros) {
+                if (l.getEstado().equalsIgnoreCase("disponible")) {
+                    listaLibros.append(l.getIdLibro()).append(" - ").append(l.getTitulo()).append(" de ").append(l.getAutor()).append("\n");
+                }
+            }
+            JOptionPane.showMessageDialog(this, listaLibros.toString());
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error al listar libros: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // Método para realizar un préstamo
+    private void realizarPrestamo() {
+        try {
+            String idLibroStr = JOptionPane.showInputDialog(this, "Ingrese el ID del libro a prestar:");
+            if (idLibroStr != null) {
+                int idLibro = Integer.parseInt(idLibroStr);
+
+                Prestamo prestamo = new Prestamo();
+                prestamo.setIdUsuario(usuario.getIdUsuario());
+                prestamo.setIdLibro(idLibro);
+                prestamo.setFechaPrestamo(new java.util.Date());
+
+                prestamoServicio.registrarPrestamo(prestamo);
+                JOptionPane.showMessageDialog(this, "✅ Préstamo realizado con éxito.");
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error al registrar el préstamo: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "ID de libro inválido", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // Método para devolver un libro
+    private void devolverLibro() {
+        try {
+            String idPrestamoStr = JOptionPane.showInputDialog(this, "Ingrese el ID del préstamo a devolver:");
+            if (idPrestamoStr != null) {
+                int idPrestamo = Integer.parseInt(idPrestamoStr);
+
+                prestamoServicio.devolverLibro(idPrestamo);
+                JOptionPane.showMessageDialog(this, "📌 Libro devuelto con éxito.");
+            }
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error al devolver el libro: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "ID de préstamo inválido", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // Método para ver préstamos activos
+    private void verPrestamosActivos() {
+        try {
+            List<Prestamo> prestamos = prestamoServicio.obtenerPrestamosActivosPorUsuario(usuario.getIdUsuario());
+            StringBuilder listaPrestamos = new StringBuilder("📌 Mis Préstamos Activos:\n");
+            for (Prestamo p : prestamos) {
+                listaPrestamos.append("📖 Libro ID: ").append(p.getIdLibro()).append(" | Fecha Préstamo: ").append(p.getFechaPrestamo()).append("\n");
+            }
+            JOptionPane.showMessageDialog(this, listaPrestamos

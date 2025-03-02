@@ -1,0 +1,80 @@
+package com.biblioteca.gui;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class AdminFrame extends JFrame {
+    public AdminFrame() {
+        setTitle("Panel de Administrador - Biblioteca");
+        setSize(600, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
+
+        // Barra de menú
+        JMenuBar menuBar = new JMenuBar();
+
+        // Menú de gestión de usuarios
+        JMenu usuariosMenu = new JMenu("Usuarios");
+        JMenuItem agregarUsuario = new JMenuItem("Agregar Usuario");
+        JMenuItem listarUsuarios = new JMenuItem("Listar Usuarios");
+        usuariosMenu.add(agregarUsuario);
+        usuariosMenu.add(listarUsuarios);
+
+        // Menú de gestión de libros
+        JMenu librosMenu = new JMenu("Libros");
+        JMenuItem agregarLibro = new JMenuItem("Agregar Libro");
+        JMenuItem listarLibros = new JMenuItem("Listar Libros");
+        librosMenu.add(agregarLibro);
+        librosMenu.add(listarLibros);
+
+        // Menú de préstamos
+        JMenu prestamosMenu = new JMenu("Préstamos");
+        JMenuItem registrarPrestamo = new JMenuItem("Registrar Préstamo");
+        JMenuItem registrarDevolucion = new JMenuItem("Registrar Devolución");
+        prestamosMenu.add(registrarPrestamo);
+        prestamosMenu.add(registrarDevolucion);
+
+        // Menú de reportes
+        JMenu reportesMenu = new JMenu("Reportes");
+        JMenuItem prestamosActivos = new JMenuItem("Préstamos Activos");
+        JMenuItem usuariosMasPrestamos = new JMenuItem("Usuarios con más Préstamos");
+        reportesMenu.add(prestamosActivos);
+        reportesMenu.add(usuariosMasPrestamos);
+
+        // Menú de sesión
+        JMenu sesionMenu = new JMenu("Sesión");
+        JMenuItem cerrarSesion = new JMenuItem("Cerrar Sesión");
+        sesionMenu.add(cerrarSesion);
+
+        // Agregar menús a la barra
+        menuBar.add(usuariosMenu);
+        menuBar.add(librosMenu);
+        menuBar.add(prestamosMenu);
+        menuBar.add(reportesMenu);
+        menuBar.add(sesionMenu);
+
+        setJMenuBar(menuBar);
+
+        // Acción para cerrar sesión
+        cerrarSesion.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose(); // Cerrar la ventana
+                new LoginFrame().setVisible(true); // Volver a la pantalla de login
+            }
+        });
+
+        // Agregar mensaje de bienvenida
+        JLabel bienvenida = new JLabel("Bienvenido al Panel de Administrador", SwingConstants.CENTER);
+        add(bienvenida, BorderLayout.CENTER);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new AdminFrame().setVisible(true);
+        });
+    }
+}

@@ -1,0 +1,123 @@
+package com.biblioteca.gui;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.SQLException;
+import java.util.List;
+import com.biblioteca.servicio.ReporteServicio;
+
+public class PanelReportes extends JPanel {
+    private ReporteServicio reporteServicio;
+    private JTable tablaReportes;
+    private DefaultTableModel modeloTabla;
+    private JButton btnGenerarReporte, btnUsuariosFrecuentes, btnLibrosMasPrestados, btnPrestamosActivos, btnRegresar;
+    private MainFrame mainFrame;
+
+    public PanelReportes(ReporteServicio reporteServicio, MainFrame mainFrame) {
+        this.reporteServicio = reporteServicio;
+        this.mainFrame = mainFrame;
+        setLayout(new BorderLayout());
+
+        // Tabla de Reportes
+        modeloTabla = new DefaultTableModel(new String[]{"ID Reporte", "Descripción", "Fecha Generación"}, 0);
+        tablaReportes = new JTable(modeloTabla);
+        cargarReportes();
+        add(new JScrollPane(tablaReportes), BorderLayout.CENTER);
+
+        // Panel de Botones
+        JPanel panelBotones = new JPanel();
+        btnGenerarReporte = new JButton("Generar Reporte");
+        btnUsuariosFrecuentes = new JButton("Usuarios Frecuentes");
+        btnLibrosMasPrestados = new JButton("Libros Más Prestados");
+        btnPrestamosActivos = new JButton("Préstamos Activos");
+        btnRegresar = new JButton("Regresar");
+
+        panelBotones.add(btnGenerarReporte);
+        panelBotones.add(btnUsuariosFrecuentes);
+        panelBotones.add(btnLibrosMasPrestados);
+        panelBotones.add(btnPrestamosActivos);
+        panelBotones.add(btnRegresar);
+        add(panelBotones, BorderLayout.SOUTH);
+
+        // Eventos de Botones
+        btnGenerarReporte.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                generarReporte();
+            }
+        });
+
+        btnUsuariosFrecuentes.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mostrarUsuariosFrecuentes();
+            }
+        });
+
+        btnLibrosMasPrestados.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mostrarLibrosMasPrestados();
+            }
+        });
+
+        btnPrestamosActivos.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mostrarPrestamosActivos();
+            }
+        });
+
+        btnRegresar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mainFrame.regresarMenuPrincipal();
+            }
+        });
+    }
+
+    private void cargarReportes() {
+        modeloTabla.setRowCount(0);
+        try {
+            List<String> reportes = reporteServicio.listarReportes();
+            for (String reporte : reportes) {
+                modeloTabla.addRow(new Object[]{reporte});
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al cargar reportes", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void generarReporte() {
+        try {
+            reporteServicio.agregarReporte("Nuevo reporte generado");
+            cargarReportes();
+            JOptionPane.showMessageDialog(this, "Reporte generado con éxito!");
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al generar reporte", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void mostrarUsuariosFrecuentes() {
+        mostrarListaEnTabla("Usuarios Frecuentes", reporteServicio.generarReporteUsuariosFrecuentes());
+    }
+
+    private void mostrarLibrosMasPrestados() {
+        mostrarListaEnTabla("Libros Más Prestados", reporteServicio.generarReporteLibrosMasPrestados());
+    }
+
+    private void mostrarPrestamosActivos() {
+        mostrarListaEnTabla("Préstamos Activos", reporteServicio.generarReportePrestamosActivos());
+    }
+
+    private void mostrarListaEnTabla(String titulo, List<String> datos) {
+        modeloTabla.setRowCount(0);
+        for (String dato : datos) {
+            modeloTabla.addRow(new Object[]{dato});
+        }
+        JOptionPane.showMessageDialog(this, "Mostrando " + titulo);
+    }
+}

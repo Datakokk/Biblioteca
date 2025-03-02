@@ -1,5 +1,0 @@
-package com.biblioteca.util;
-
-public class ConexionJDBC {
-
-}

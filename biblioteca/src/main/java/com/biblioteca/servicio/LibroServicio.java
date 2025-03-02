@@ -23,6 +23,10 @@ public class LibroServicio {
 		libroDAO.actualizarLibro(libro);
 	}
 	
+	public Libro obtenerLibroPorID(int idLibro) throws SQLException {
+		return libroDAO.obtenerLibroPorID(idLibro);
+	}
+	
 	public void eliminarLibro(int idLibro) throws SQLException {
 		libroDAO.eliminarLibro(idLibro);
 	}

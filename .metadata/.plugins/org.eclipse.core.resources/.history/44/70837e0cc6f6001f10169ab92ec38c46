@@ -1,0 +1,79 @@
+package com.biblioteca.gui;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.SQLException;
+import java.util.List;
+import com.biblioteca.servicio.ReporteServicio;
+import com.biblioteca.modelo.Reporte;
+
+public class PanelReportes extends JPanel {
+    private ReporteServicio reporteServicio;
+    private JTable tablaReportes;
+    private DefaultTableModel modeloTabla;
+    private JButton btnGenerar, btnRegresar;
+    private MainFrame mainFrame;
+
+    public PanelReportes(ReporteServicio reporteServicio, MainFrame mainFrame) {
+        this.reporteServicio = reporteServicio;
+        this.mainFrame = mainFrame;
+        setLayout(new BorderLayout());
+
+        // Tabla de Reportes
+        modeloTabla = new DefaultTableModel(new String[]{"ID Reporte", "Descripción", "Fecha Generación"}, 0);
+        tablaReportes = new JTable(modeloTabla);
+        cargarReportes();
+        add(new JScrollPane(tablaReportes), BorderLayout.CENTER);
+
+        // Panel de Botones
+        JPanel panelBotones = new JPanel();
+        btnGenerar = new JButton("Generar Reporte");
+        btnRegresar = new JButton("Regresar");
+        panelBotones.add(btnGenerar);
+        panelBotones.add(btnRegresar);
+        add(panelBotones, BorderLayout.SOUTH);
+
+        // Eventos de Botones
+        btnGenerar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                generarReporte();
+            }
+        });
+        
+        btnRegresar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mainFrame.regresarMenuPrincipal();
+            }
+        });
+    }
+
+    private void cargarReportes() {
+        modeloTabla.setRowCount(0);
+        try {
+            List<Reporte> reportes = reporteServicio.listarReportes();
+            for (Reporte reporte : reportes) {
+                modeloTabla.addRow(new Object[]{
+                        reporte.getIdReporte(),
+                        reporte.getDescripcion(),
+                        reporte.getFechaGeneracion()});
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al cargar reportes", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void generarReporte() {
+        try {
+            reporteServicio.generarReporte("Nuevo reporte generado");
+            cargarReportes();
+            JOptionPane.showMessageDialog(this, "Reporte generado con éxito!");
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al generar reporte", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+}

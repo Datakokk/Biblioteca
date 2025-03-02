@@ -1,0 +1,116 @@
+package com.biblioteca.gui;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.SQLException;
+import java.util.List;
+import com.biblioteca.servicio.ReservaServicio;
+import com.biblioteca.modelo.Reserva;
+
+public class PanelReservas extends JPanel {
+    private ReservaServicio reservaServicio;
+    private JTable tablaReservas;
+    private DefaultTableModel modeloTabla;
+    private JTextField txtIdUsuario, txtIdLibro;
+    private JButton btnReservar, btnCancelar;
+
+    public PanelReservas(ReservaServicio reservaServicio) {
+        this.reservaServicio = reservaServicio;
+        setLayout(new BorderLayout());
+
+        // Tabla de Reservas
+        modeloTabla = new DefaultTableModel(new String[]{"ID Reserva", "ID Usuario", "ID Libro", "Fecha Reserva", "Estado"}, 0);
+        tablaReservas = new JTable(modeloTabla);
+        cargarReservas();
+        add(new JScrollPane(tablaReservas), BorderLayout.CENTER);
+
+        // Panel de Formularios
+        JPanel panelFormulario = new JPanel(new GridLayout(3, 2, 5, 5));
+        panelFormulario.setBorder(BorderFactory.createTitledBorder("Realizar Reserva"));
+        txtIdUsuario = new JTextField();
+        txtIdLibro = new JTextField();
+        
+        panelFormulario.add(new JLabel("ID Usuario:"));
+        panelFormulario.add(txtIdUsuario);
+        panelFormulario.add(new JLabel("ID Libro:"));
+        panelFormulario.add(txtIdLibro);
+        
+        add(panelFormulario, BorderLayout.NORTH);
+
+        // Panel de Botones
+        JPanel panelBotones = new JPanel();
+        btnReservar = new JButton("Reservar Libro");
+        btnCancelar = new JButton("Cancelar Reserva");
+        panelBotones.add(btnReservar);
+        panelBotones.add(btnCancelar);
+        add(panelBotones, BorderLayout.SOUTH);
+
+        // Eventos de Botones
+        btnReservar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                reservarLibro();
+            }
+        });
+
+        btnCancelar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                cancelarReserva();
+            }
+        });
+    }
+
+    private void cargarReservas() {
+        modeloTabla.setRowCount(0);
+        try {
+            List<Reserva> reservas = reservaServicio.listarReservas();
+            for (Reserva reserva : reservas) {
+                modeloTabla.addRow(new Object[]{
+                        reserva.getIdReserva(),
+                        reserva.getIdUsuario(),
+                        reserva.getIdLibro(),
+                        reserva.getFechaReserva(),
+                        reserva.getEstadoReserva()});
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al cargar reservas", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void reservarLibro() {
+        try {
+            Reserva reserva = new Reserva();
+            reserva.setIdUsuario(Integer.parseInt(txtIdUsuario.getText()));
+            reserva.setIdLibro(Integer.parseInt(txtIdLibro.getText()));
+            reserva.setFechaReserva(new java.util.Date());
+            reserva.setEstadoReserva("pendiente");
+
+            reservaServicio.registrarReserva(reserva);
+            cargarReservas();
+            JOptionPane.showMessageDialog(this, "Libro reservado con éxito!");
+        } catch (SQLException | NumberFormatException e) {
+            JOptionPane.showMessageDialog(this, "Error al reservar libro", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void cancelarReserva() {
+        int filaSeleccionada = tablaReservas.getSelectedRow();
+        if (filaSeleccionada == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione una reserva para cancelar");
+            return;
+        }
+
+        try {
+            int idReserva = (int) modeloTabla.getValueAt(filaSeleccionada, 0);
+            reservaServicio.actualizarEstadoReserva(idReserva, "cancelada");
+            cargarReservas();
+            JOptionPane.showMessageDialog(this, "Reserva cancelada con éxito!");
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al cancelar reserva", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+}

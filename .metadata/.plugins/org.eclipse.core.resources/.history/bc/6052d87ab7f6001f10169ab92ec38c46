@@ -1,0 +1,64 @@
+package com.biblioteca.gui;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+
+public class UsuarioFrame extends JFrame {
+    public UsuarioFrame() {
+        setTitle("Panel de Usuario - Biblioteca");
+        setSize(500, 300);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
+
+        // Barra de menú
+        JMenuBar menuBar = new JMenuBar();
+
+        // Menú de libros
+        JMenu librosMenu = new JMenu("Libros");
+        JMenuItem listarLibros = new JMenuItem("Listar Libros Disponibles");
+        librosMenu.add(listarLibros);
+
+        // Menú de préstamos
+        JMenu prestamosMenu = new JMenu("Préstamos");
+        JMenuItem solicitarPrestamo = new JMenuItem("Solicitar Préstamo");
+        JMenuItem devolverLibro = new JMenuItem("Registrar Devolución");
+        JMenuItem misPrestamos = new JMenuItem("Mis Préstamos Activos");
+        prestamosMenu.add(solicitarPrestamo);
+        prestamosMenu.add(devolverLibro);
+        prestamosMenu.add(misPrestamos);
+
+        // Menú de sesión
+        JMenu sesionMenu = new JMenu("Sesión");
+        JMenuItem cerrarSesion = new JMenuItem("Cerrar Sesión");
+        sesionMenu.add(cerrarSesion);
+
+        // Agregar menús a la barra
+        menuBar.add(librosMenu);
+        menuBar.add(prestamosMenu);
+        menuBar.add(sesionMenu);
+
+        setJMenuBar(menuBar);
+
+        // Acción para cerrar sesión
+        cerrarSesion.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                dispose(); // Cerrar la ventana
+                new LoginFrame().setVisible(true); // Volver a la pantalla de login
+            }
+        });
+
+        // Agregar mensaje de bienvenida
+        JLabel bienvenida = new JLabel("Bienvenido al Panel de Usuario", SwingConstants.CENTER);
+        add(bienvenida, BorderLayout.CENTER);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            new UsuarioFrame().setVisible(true);
+        });
+    }
+}

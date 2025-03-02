@@ -40,33 +40,40 @@ public class PrestamoDAO {
 
     // 2. Registrar devolución de un libro
     public void devolverLibro(int idPrestamo) throws SQLException {
+        // Verificar si el préstamo ya fue devuelto
+        String verificarDevolucion = "SELECT fecha_devolucion, id_libro FROM prestamos WHERE id_prestamo = ?";
+        int idLibro = -1;
+        Date fechaDevolucion = null;
+        
+        try (PreparedStatement ps = conexion.prepareStatement(verificarDevolucion)) {
+            ps.setInt(1, idPrestamo);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) {
+                    fechaDevolucion = rs.getDate("fecha_devolucion");
+                    idLibro = rs.getInt("id_libro");
+                }
+            }
+        }
+
+        if (fechaDevolucion != null) {
+            throw new SQLException("Este préstamo ya ha sido devuelto anteriormente.");
+        }
+
+        // Actualizar la fecha de devolución
         String sql = "UPDATE prestamos SET fecha_devolucion = NOW() WHERE id_prestamo = ?";
         try (PreparedStatement ps = conexion.prepareStatement(sql)) {
             ps.setInt(1, idPrestamo);
             ps.executeUpdate();
         }
 
-        // Obtener el ID del libro para actualizar su estado
-        String obtenerLibro = "SELECT id_libro FROM prestamos WHERE id_prestamo = ?";
-        int idLibro = -1;
-        try (PreparedStatement ps = conexion.prepareStatement(obtenerLibro)) {
-            ps.setInt(1, idPrestamo);
-            try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    idLibro = rs.getInt("id_libro");
-                }
-            }
-        }
-
-        if (idLibro != -1) {
-            String actualizarEstado = "UPDATE libros SET estado = 'disponible' WHERE id_libro = ?";
-            try (PreparedStatement ps = conexion.prepareStatement(actualizarEstado)) {
-                ps.setInt(1, idLibro);
-                ps.executeUpdate();
-            }
+        // Actualizar el estado del libro a 'disponible'
+        String actualizarEstado = "UPDATE libros SET estado = 'disponible' WHERE id_libro = ?";
+        try (PreparedStatement ps = conexion.prepareStatement(actualizarEstado)) {
+            ps.setInt(1, idLibro);
+            ps.executeUpdate();
         }
     }
-
+    
     // 3. Listar todos los préstamos
     public List<Prestamo> listarPrestamos() throws SQLException {
         List<Prestamo> prestamos = new ArrayList<>();

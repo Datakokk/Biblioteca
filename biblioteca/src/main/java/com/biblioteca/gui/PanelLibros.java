@@ -1,0 +1,158 @@
+package com.biblioteca.gui;
+
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.SQLException;
+import java.util.List;
+import com.biblioteca.servicio.LibroServicio;
+import com.biblioteca.modelo.Libro;
+
+public class PanelLibros extends JPanel {
+    private LibroServicio libroServicio;
+    private JTable tablaLibros;
+    private DefaultTableModel modeloTabla;
+    private JTextField txtTitulo, txtAutor, txtGenero;
+    private JButton btnAgregar, btnActualizar, btnEliminar, btnRegresar;
+    private MainFrame mainFrame;
+
+    public PanelLibros(LibroServicio libroServicio, MainFrame mainFrame) {
+        this.libroServicio = libroServicio;
+        this.mainFrame = mainFrame;
+        setLayout(new BorderLayout());
+
+        // Tabla de Libros
+        modeloTabla = new DefaultTableModel(new String[]{"ID", "Título", "Autor", "Género", "Estado"}, 0);
+        tablaLibros = new JTable(modeloTabla);
+        cargarLibros();
+        add(new JScrollPane(tablaLibros), BorderLayout.CENTER);
+
+        // Panel de Formularios
+        JPanel panelFormulario = new JPanel(new GridLayout(4, 2, 5, 5));
+        panelFormulario.setBorder(BorderFactory.createTitledBorder("Gestionar Libro"));
+        txtTitulo = new JTextField();
+        txtAutor = new JTextField();
+        txtGenero = new JTextField();
+
+        panelFormulario.add(new JLabel("Título:"));
+        panelFormulario.add(txtTitulo);
+        panelFormulario.add(new JLabel("Autor:"));
+        panelFormulario.add(txtAutor);
+        panelFormulario.add(new JLabel("Género:"));
+        panelFormulario.add(txtGenero);
+
+        add(panelFormulario, BorderLayout.NORTH);
+
+        // Panel de Botones
+        JPanel panelBotones = new JPanel();
+        btnAgregar = new JButton("Agregar");
+        btnActualizar = new JButton("Actualizar");
+        btnEliminar = new JButton("Eliminar");
+        btnRegresar = new JButton("Regresar");
+        panelBotones.add(btnAgregar);
+        panelBotones.add(btnActualizar);
+        panelBotones.add(btnEliminar);
+        panelBotones.add(btnRegresar);
+        add(panelBotones, BorderLayout.SOUTH);
+
+        // Eventos de Botones
+        btnAgregar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                agregarLibro();
+            }
+        });
+
+        btnActualizar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                actualizarLibro();
+            }
+        });
+
+        btnEliminar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                eliminarLibro();
+            }
+        });
+        
+        btnRegresar.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                mainFrame.regresarMenuPrincipal();
+            }
+        });
+    }
+
+    private void cargarLibros() {
+        modeloTabla.setRowCount(0);
+        try {
+            List<Libro> libros = libroServicio.listarLibros();
+            for (Libro libro : libros) {
+                modeloTabla.addRow(new Object[]{libro.getIdLibro(), libro.getTitulo(), libro.getAutor(), libro.getGenero(), libro.getEstado()});
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al cargar libros", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void agregarLibro() {
+        try {
+            Libro libro = new Libro();
+            libro.setTitulo(txtTitulo.getText());
+            libro.setAutor(txtAutor.getText());
+            libro.setGenero(txtGenero.getText());
+            libro.setEstado("disponible");
+            
+            libroServicio.agregarLibro(libro);
+            cargarLibros();
+            JOptionPane.showMessageDialog(this, "Libro agregado con éxito!");
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al agregar libro", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void actualizarLibro() {
+        int filaSeleccionada = tablaLibros.getSelectedRow();
+        if (filaSeleccionada == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un libro para actualizar");
+            return;
+        }
+
+        try {
+            int idLibro = (int) modeloTabla.getValueAt(filaSeleccionada, 0);
+            Libro libro = new Libro();
+            libro.setIdLibro(idLibro);
+            libro.setTitulo(txtTitulo.getText());
+            libro.setAutor(txtAutor.getText());
+            libro.setGenero(txtGenero.getText());
+            libro.setEstado("disponible");
+
+            libroServicio.actualizarLibro(libro);
+            cargarLibros();
+            JOptionPane.showMessageDialog(this, "Libro actualizado con éxito!");
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al actualizar libro", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    private void eliminarLibro() {
+        int filaSeleccionada = tablaLibros.getSelectedRow();
+        if (filaSeleccionada == -1) {
+            JOptionPane.showMessageDialog(this, "Seleccione un libro para eliminar");
+            return;
+        }
+
+        try {
+            int idLibro = (int) modeloTabla.getValueAt(filaSeleccionada, 0);
+            libroServicio.eliminarLibro(idLibro);
+            cargarLibros();
+            JOptionPane.showMessageDialog(this, "Libro eliminado con éxito!");
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al eliminar libro", "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+}

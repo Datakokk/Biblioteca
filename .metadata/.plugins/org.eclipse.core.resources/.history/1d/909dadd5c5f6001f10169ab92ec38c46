@@ -1,0 +1,24 @@
+package com.biblioteca.servicio;
+
+import com.biblioteca.dao.ReporteDAO;
+import com.biblioteca.modelo.Reporte;
+import java.sql.SQLException;
+import java.util.List;
+
+public class ReporteServicio {
+    private ReporteDAO reporteDAO;
+
+    public ReporteServicio(ReporteDAO reporteDAO) {
+        this.reporteDAO = reporteDAO;
+    }
+
+    public List<Reporte> listarReportes() throws SQLException {
+        return reporteDAO.obtenerTodosLosReportes();
+    }
+
+    public void generarReporte(String descripcion) throws SQLException {
+        Reporte reporte = new Reporte();
+        reporte.setDescripcion(descripcion);
+        reporteDAO.insertarReporte(reporte);
+    }
+}

@@ -32,7 +32,7 @@ public class ReporteDAO {
 	// Listar todos los reportes
 	public List<Reporte> listarReportes() throws SQLException {
 		List<Reporte> reportes = new ArrayList<>();
-		String sql = "SELECT * FROM reservas";
+		String sql = "SELECT * FROM reportes";
 		try(Statement st = conexion.createStatement();
 			ResultSet rs = st.executeQuery(sql)){
 			while(rs.next()) {
@@ -44,4 +44,70 @@ public class ReporteDAO {
 		}
 		return reportes;
 	}
+	
+	// Muestra los libros que aun no han sido devueltos
+	public List<String> generarReportePrestamosActivos() throws SQLException {
+	    List<String> reportes = new ArrayList<>();
+	    String sql = "SELECT u.nombre AS usuario, l.titulo AS libro, p.fecha_prestamo " +
+	                 "FROM prestamos p " +
+	                 "JOIN usuarios u ON p.id_usuario = u.id_usuario " +
+	                 "JOIN libros l ON p.id_libro = l.id_libro " +
+	                 "WHERE p.fecha_devolucion IS NULL";
+	    
+	    try (Statement st = conexion.createStatement();
+	         ResultSet rs = st.executeQuery(sql)) {
+	        while (rs.next()) {
+	            String reporte = "Usuario: " + rs.getString("usuario") +
+	                             " | Libro: " + rs.getString("libro") +
+	                             " | Fecha Préstamo: " + rs.getDate("fecha_prestamo");
+	            reportes.add(reporte);
+	        }
+	    }
+	    return reportes;
+	}
+	
+	//Muestra los usuarios que han realizado mas prestamos.
+	public List<String> generarReporteUsuariosFrecuentes() throws SQLException {
+	    List<String> reportes = new ArrayList<>();
+	    String sql = "SELECT u.nombre, COUNT(p.id_prestamo) AS total_prestamos " +
+	                 "FROM prestamos p " +
+	                 "JOIN usuarios u ON p.id_usuario = u.id_usuario " +
+	                 "GROUP BY u.nombre " +
+	                 "ORDER BY total_prestamos DESC " +
+	                 "LIMIT 5"; // Solo los 5 usuarios más frecuentes
+	    
+	    try (Statement st = conexion.createStatement();
+	         ResultSet rs = st.executeQuery(sql)) {
+	        while (rs.next()) {
+	            String reporte = "Usuario: " + rs.getString("nombre") +
+	                             " | Total Préstamos: " + rs.getInt("total_prestamos");
+	            reportes.add(reporte);
+	        }
+	    }
+	    return reportes;
+	}
+	
+	//Muestra los libros que mas han sido prestados
+	public List<String> generarReporteLibrosMasPrestados() throws SQLException {
+	    List<String> reportes = new ArrayList<>();
+	    String sql = "SELECT l.titulo, COUNT(p.id_prestamo) AS total_prestamos " +
+	                 "FROM prestamos p " +
+	                 "JOIN libros l ON p.id_libro = l.id_libro " +
+	                 "GROUP BY l.titulo " +
+	                 "ORDER BY total_prestamos DESC " +
+	                 "LIMIT 5"; // Solo los 5 libros más populares
+	    
+	    try (Statement st = conexion.createStatement();
+	         ResultSet rs = st.executeQuery(sql)) {
+	        while (rs.next()) {
+	            String reporte = "Libro: " + rs.getString("titulo") +
+	                             " | Total Veces Prestado: " + rs.getInt("total_prestamos");
+	            reportes.add(reporte);
+	        }
+	    }
+	    return reportes;
+	}
+
+
+
 }

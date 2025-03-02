@@ -1,0 +1,67 @@
+package com.biblioteca.servicio;
+
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+
+import com.biblioteca.dao.UsuarioDAO;
+import com.biblioteca.modelo.Usuario;
+import org.mindrot.jbcrypt.BCrypt;
+
+public class UsuarioServicio {
+
+	private UsuarioDAO usuarioDAO;
+	
+	public UsuarioServicio(Connection conexion) {
+		this.usuarioDAO = new UsuarioDAO(conexion);
+	}
+	
+	public Usuario obtenerUsuarioPorEmail(String email) throws SQLException {
+        return usuarioDAO.obtenerUsuarioPorEmail(email); // Llama al DAO para buscar el usuario
+    }
+	
+	public void registrarUsuario(Usuario usuario) throws SQLException {
+		if(usuarioDAO.obtenerUsuarioPorEmail(usuario.getEmail()) != null) {
+			throw new SQLException("El email ya esta registrado");
+		}
+		
+		// 🔐 Hashear la contraseña antes de guardarla
+        String hashedPassword = BCrypt.hashpw(usuario.getPassword(), BCrypt.gensalt());
+        usuario.setPassword(hashedPassword);
+
+		usuarioDAO.agregarUsuario(usuario);
+	}
+	
+	public Usuario autenticarUsuario(String email, String password) throws SQLException {
+        Usuario usuario = usuarioDAO.obtenerUsuarioPorEmail(email);
+
+        if (usuario != null) {
+            System.out.println("🔍 Email ingresado: " + email);
+            System.out.println("🔐 Hash almacenado: " + usuario.getPassword());
+            System.out.println("🔑 Contraseña ingresada: " + password);
+
+            // Intentar verificar la contraseña con BCrypt
+            boolean match = BCrypt.checkpw(password, usuario.getPassword());
+            System.out.println("🔍 Comparación de contraseña: " + match);
+
+            if (match) {
+                System.out.println("✅ Contraseña correcta");
+                return usuario;
+            } else {
+                System.out.println("❌ Contraseña incorrecta");
+            }
+        } else {
+            System.out.println("⚠ Usuario no encontrado");
+        }
+
+        return null;
+    }
+	
+	public Usuario obtenerUsuarioEmail(String email) throws SQLException {
+		return usuarioDAO.obtenerUsuarioPorEmail(email);
+	}
+	
+	public List<Usuario> listarUsuarios() throws SQLException{
+		return usuarioDAO.listarUsuarios();
+	}
+}

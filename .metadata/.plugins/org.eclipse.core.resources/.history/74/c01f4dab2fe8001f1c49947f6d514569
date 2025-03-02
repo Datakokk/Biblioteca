@@ -1,8 +1,0 @@
-package com.biblioteca.servicio;
-
-public class Snippet {
-	public static void main(String[] args) {
-		PrestamoServicio
-	}
-}
-

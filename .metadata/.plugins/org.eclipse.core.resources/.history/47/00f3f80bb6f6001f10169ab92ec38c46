@@ -1,0 +1,168 @@
+package com.biblioteca.gui;
+
+import com.biblioteca.modelo.Usuario;
+import com.biblioteca.modelo.Libro;
+import com.biblioteca.servicio.UsuarioServicio;
+import com.biblioteca.servicio.LibroServicio;
+import com.biblioteca.util.ConexionJDBC;
+
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.SQLException;
+import java.util.List;
+
+public class AdminFrame extends JFrame {
+    private UsuarioServicio usuarioServicio;
+    private LibroServicio libroServicio;
+
+    public AdminFrame() {
+        setTitle("Panel de Administrador - Biblioteca");
+        setSize(600, 400);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setLocationRelativeTo(null);
+        setLayout(new BorderLayout());
+
+        // Conexión a la base de datos
+        try {
+            Connection conexion = ConexionJDBC.obtenerConexion();
+            usuarioServicio = new UsuarioServicio(conexion);
+            libroServicio = new LibroServicio(conexion);
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Error al conectar con la base de datos", "Error", JOptionPane.ERROR_MESSAGE);
+            System.exit(1);
+        }
+
+        // Barra de menú
+        JMenuBar menuBar = new JMenuBar();
+
+        // Menú de gestión de usuarios
+        JMenu usuariosMenu = new JMenu("Usuarios");
+        JMenuItem agregarUsuario = new JMenuItem("Agregar Usuario");
+        JMenuItem listarUsuarios = new JMenuItem("Listar Usuarios");
+        usuariosMenu.add(agregarUsuario);
+        usuariosMenu.add(listarUsuarios);
+
+        // Menú de gestión de libros
+        JMenu librosMenu = new JMenu("Libros");
+        JMenuItem agregarLibro = new JMenuItem("Agregar Libro");
+        JMenuItem listarLibros = new JMenuItem("Listar Libros");
+        librosMenu.add(agregarLibro);
+        librosMenu.add(listarLibros);
+
+        // Menú de sesión
+        JMenu sesionMenu = new JMenu("Sesión");
+        JMenuItem cerrarSesion = new JMenuItem("Cerrar Sesión");
+        sesionMenu.add(cerrarSesion);
+
+        // Agregar menús a la barra
+        menuBar.add(usuariosMenu);
+        menuBar.add(librosMenu);
+        menuBar.add(sesionMenu);
+        setJMenuBar(menuBar);
+
+        // Acción para cerrar sesión
+        cerrarSesion.addActionListener(e -> {
+            dispose();
+            new LoginFrame().setVisible(true);
+        });
+
+        // Acción para agregar usuario
+        agregarUsuario.addActionListener(e -> agregarUsuario());
+
+        // Acción para listar usuarios
+        listarUsuarios.addActionListener(e -> listarUsuarios());
+
+        // Acción para agregar libro
+        agregarLibro.addActionListener(e -> agregarLibro());
+
+        // Acción para listar libros
+        listarLibros.addActionListener(e -> listarLibros());
+
+        // Mensaje de bienvenida
+        JLabel bienvenida = new JLabel("Bienvenido al Panel de Administrador", SwingConstants.CENTER);
+        add(bienvenida, BorderLayout.CENTER);
+    }
+
+    // Método para agregar usuario
+    private void agregarUsuario() {
+        String nombre = JOptionPane.showInputDialog(this, "Ingrese el nombre del usuario:");
+        String email = JOptionPane.showInputDialog(this, "Ingrese el email:");
+        String telefono = JOptionPane.showInputDialog(this, "Ingrese el teléfono:");
+        String rol = JOptionPane.showInputDialog(this, "Ingrese el rol (administrador/usuario):");
+        String password = JOptionPane.showInputDialog(this, "Ingrese la contraseña:");
+
+        if (nombre != null && email != null && telefono != null && rol != null && password != null) {
+            try {
+                Usuario nuevoUsuario = new Usuario();
+                nuevoUsuario.setNombre(nombre);
+                nuevoUsuario.setEmail(email);
+                nuevoUsuario.setTelefono(telefono);
+                nuevoUsuario.setRol(rol);
+                nuevoUsuario.setPassword(password);
+
+                usuarioServicio.registrarUsuario(nuevoUsuario);
+                JOptionPane.showMessageDialog(this, "Usuario agregado con éxito.");
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Error al agregar usuario: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    // Método para listar usuarios
+    private void listarUsuarios() {
+        try {
+            List<Usuario> usuarios = usuarioServicio.listarUsuarios();
+            StringBuilder listaUsuarios = new StringBuilder("Usuarios registrados:\n");
+            for (Usuario u : usuarios) {
+                listaUsuarios.append(u.getIdUsuario()).append(" - ").append(u.getNombre()).append(" (").append(u.getEmail()).append(")\n");
+            }
+            JOptionPane.showMessageDialog(this, listaUsuarios.toString());
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error al listar usuarios: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    // Método para agregar libro
+    private void agregarLibro() {
+        String titulo = JOptionPane.showInputDialog(this, "Ingrese el título del libro:");
+        String autor = JOptionPane.showInputDialog(this, "Ingrese el autor:");
+        String genero = JOptionPane.showInputDialog(this, "Ingrese el género:");
+        String estado = "disponible";  // Estado inicial
+
+        if (titulo != null && autor != null && genero != null) {
+            try {
+                Libro libro = new Libro();
+                libro.setTitulo(titulo);
+                libro.setAutor(autor);
+                libro.setGenero(genero);
+                libro.setEstado(estado);
+
+                libroServicio.agregarLibro(libro);
+                JOptionPane.showMessageDialog(this, "Libro agregado con éxito.");
+            } catch (SQLException ex) {
+                JOptionPane.showMessageDialog(this, "Error al agregar libro: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            }
+        }
+    }
+
+    // Método para listar libros
+    private void listarLibros() {
+        try {
+            List<Libro> libros = libroServicio.listarLibros();
+            StringBuilder listaLibros = new StringBuilder("Libros disponibles:\n");
+            for (Libro l : libros) {
+                listaLibros.append(l.getIdLibro()).append(" - ").append(l.getTitulo()).append(" de ").append(l.getAutor()).append("\n");
+            }
+            JOptionPane.showMessageDialog(this, listaLibros.toString());
+        } catch (SQLException ex) {
+            JOptionPane.showMessageDialog(this, "Error al listar libros: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> new AdminFrame().setVisible(true));
+    }
+}
