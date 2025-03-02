@@ -1,6 +1,7 @@
 package com.biblioteca.dao;
 
 import com.biblioteca.modelo.Prestamo;
+import com.biblioteca.util.LoggerUtil;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -28,6 +29,7 @@ public class PrestamoDAO {
                     prestamo.setIdPrestamo(rs.getInt(1));
                 }
             }
+            LoggerUtil.registrarEvento("Préstamo registrado: Libro ID " + prestamo.getIdLibro() + " a Usuario ID " + prestamo.getIdUsuario());
         }
 
         // Actualizar el estado del libro a "prestado"
@@ -72,6 +74,7 @@ public class PrestamoDAO {
             ps.setInt(1, idLibro);
             ps.executeUpdate();
         }
+        LoggerUtil.registrarEvento("Libro devuelto: ID Prestamo " + idPrestamo + " - Libro ID " + idLibro);
     }
     
     // 3. Listar todos los préstamos
@@ -90,6 +93,7 @@ public class PrestamoDAO {
                 prestamos.add(prestamo);
             }
         }
+        LoggerUtil.registrarEvento("Listado de préstamos consultado. Total: " + prestamos.size());
         return prestamos;
     }
 
@@ -111,7 +115,7 @@ public class PrestamoDAO {
                 }
             }
         }
+        LoggerUtil.registrarEvento("Préstamos activos consultados para Usuario ID: " + idUsuario + ". Total: " + prestamos.size());
         return prestamos;
     }
 }
-

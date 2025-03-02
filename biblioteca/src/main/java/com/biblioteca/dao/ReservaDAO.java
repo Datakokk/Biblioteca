@@ -4,6 +4,7 @@ import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 import com.biblioteca.modelo.Reserva;
+import com.biblioteca.util.LoggerUtil;
 
 public class ReservaDAO {
     private Connection conexion;
@@ -28,6 +29,7 @@ public class ReservaDAO {
                     reserva.setIdReserva(rs.getInt(1));
                 }
             }
+            LoggerUtil.registrarEvento("Reserva registrada: Usuario ID " + reserva.getIdUsuario() + " - Libro ID " + reserva.getIdLibro());
         }
     }
 
@@ -38,6 +40,7 @@ public class ReservaDAO {
             ps.setString(1, nuevoEstado);
             ps.setInt(2, idReserva);
             ps.executeUpdate();
+            LoggerUtil.registrarEvento("Reserva actualizada: ID " + idReserva + " - Nuevo estado: " + nuevoEstado);
         }
     }
 
@@ -59,6 +62,7 @@ public class ReservaDAO {
                 }
             }
         }
+        LoggerUtil.registrarEvento("Reservas consultadas para Usuario ID: " + idUsuario + ". Total: " + reservas.size());
         return reservas;
     }
 
@@ -78,6 +82,7 @@ public class ReservaDAO {
                 reservas.add(reserva);
             }
         }
+        LoggerUtil.registrarEvento("Listado de reservas consultado. Total: " + reservas.size());
         return reservas;
     }
 }
