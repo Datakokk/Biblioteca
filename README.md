@@ -44,16 +44,6 @@ Ejecuta el siguiente script SQL para crear la base de datos y las tablas necesar
 CREATE DATABASE biblioteca;
 USE biblioteca;
 
-DROP TRIGGER IF EXISTS actualizar_estado_libro;
-DROP TRIGGER IF EXISTS validar_estado_libro;
-
-DROP TABLE IF EXISTS reportes;
-DROP TABLE IF EXISTS prestamos_express;
-DROP TABLE IF EXISTS prestamos;
-DROP TABLE IF EXISTS reservas;
-DROP TABLE IF EXISTS libros;
-DROP TABLE IF EXISTS usuarios;
-
 CREATE TABLE usuarios (
     id_usuario INT AUTO_INCREMENT PRIMARY KEY,
     nombre VARCHAR(100) NOT NULL,
@@ -96,53 +86,6 @@ CREATE TABLE reportes (
     descripcion TEXT NOT NULL,
     fecha_generacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
-DELIMITER //
-CREATE TRIGGER actualizar_estado_libro
-AFTER UPDATE ON prestamos
-FOR EACH ROW
-BEGIN
-    -- Verifica que la fecha_devolucion no sea NULL y que el libro no esté ya marcado como 'disponible'
-    IF NEW.fecha_devolucion IS NOT NULL THEN
-        UPDATE libros
-        SET estado = 'disponible'
-        WHERE id_libro = NEW.id_libro AND estado != 'disponible';
-    END IF;
-END;
-//
-DELIMITER ;
-
-DELIMITER //
-CREATE TRIGGER validar_estado_libro
-BEFORE INSERT ON prestamos
-FOR EACH ROW
-BEGIN
-    DECLARE libro_estado VARCHAR(50);
-    DECLARE libro_existente INT;
-
-    -- Verifica si el libro existe
-    SELECT COUNT(*) INTO libro_existente
-    FROM libros
-    WHERE id_libro = NEW.id_libro;
-
-    IF libro_existente = 0 THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'El libro especificado no existe.';
-    END IF;
-
-    -- Obtiene el estado del libro
-    SELECT estado INTO libro_estado
-    FROM libros
-    WHERE id_libro = NEW.id_libro;
-
-    -- Verifica si el libro está disponible
-    IF libro_estado != 'disponible' THEN
-        SIGNAL SQLSTATE '45000'
-        SET MESSAGE_TEXT = 'El libro no está disponible para préstamo.';
-    END IF;
-END;
-//
-DELIMITER ;
 ```
 
 ### 3️⃣ Configurar el archivo de conexión JDBC
