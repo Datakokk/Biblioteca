@@ -4,42 +4,42 @@ Este proyecto es una aplicación de escritorio en Java que permite gestionar una
 
 🚀 Características principales
 
-Gestión de usuarios (registro, autenticación y roles).
+📌 Gestión de usuarios (registro, autenticación y roles).
 
-Gestión de libros (agregar, actualizar, eliminar y buscar libros).
+📖 Gestión de libros (agregar, actualizar, eliminar y buscar libros).
 
-Gestión de préstamos y devoluciones.
+🔄 Gestión de préstamos y devoluciones.
 
-Gestión de reservas de libros.
+📅 Gestión de reservas de libros.
 
-Generación de reportes de uso.
+📊 Generación de reportes de uso.
 
-Interfaz gráfica con Swing para una experiencia más intuitiva.
+🎨 Interfaz gráfica con Swing para una experiencia más intuitiva.
 
 🛠️ Requisitos Previos
 
 Antes de instalar y ejecutar el proyecto, asegúrate de tener los siguientes requisitos:
 
-Java JDK 11 o superior
+✅ Java JDK 11 o superior
 
-MySQL Server
+✅ MySQL Server
 
-Eclipse IDE (o cualquier otro IDE compatible con proyectos Java Maven)
+✅ Eclipse IDE (o cualquier otro IDE compatible con proyectos Java Maven)
 
-Maven (para la gestión de dependencias)
+✅ Maven (para la gestión de dependencias)
 
-Git (opcional, para clonar el repositorio)
+✅ Git (opcional, para clonar el repositorio)
 
 ⚙️ Instalación y Configuración
 
-1️⃣ Clonar el repositorio
+🔹 1️⃣ Clonar el repositorio
 
 Si deseas obtener el código desde GitHub, usa el siguiente comando:
 
 git clone https://github.com/tu-usuario/sistema-biblioteca.git
 cd sistema-biblioteca
 
-2️⃣ Configurar la base de datos MySQL
+🔹 2️⃣ Configurar la base de datos MySQL
 
 Ejecuta el siguiente script SQL para crear la base de datos y las tablas necesarias:
 
@@ -73,7 +73,7 @@ FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario),
 FOREIGN KEY (id_libro) REFERENCES libros(id_libro)
 );
 
-3️⃣ Configurar el archivo de conexión JDBC
+🔹 3️⃣ Configurar el archivo de conexión JDBC
 
 Edita el archivo config.properties dentro del proyecto y configura la conexión con MySQL:
 
@@ -82,7 +82,7 @@ db.user=root
 db.password=tu_contraseña
 db.driver=com.mysql.cj.jdbc.Driver
 
-4️⃣ Ejecutar el Proyecto
+🔹 4️⃣ Ejecutar el Proyecto
 
 Desde Eclipse o cualquier otro IDE, ejecuta la clase MainFrame.java para iniciar la aplicación con interfaz gráfica.
 Si deseas ejecutarlo desde la terminal, usa:
@@ -92,45 +92,45 @@ mvn exec:java -Dexec.mainClass="com.biblioteca.gui.MainFrame"
 
 🖥️ Uso del Sistema
 
-👤 Inicio de sesión
+🔑 Inicio de sesión
 
-Los usuarios deben autenticarse con su email y contraseña.
+🆔 Los usuarios deben autenticarse con su email y contraseña.
 
-Si es un administrador, tendrá acceso a la gestión de libros, préstamos y reportes.
+🔐 Si es un administrador, tendrá acceso a la gestión de libros, préstamos y reportes.
 
 📚 Gestión de Libros
 
-Agregar, actualizar y eliminar libros.
+➕ Agregar, actualizar y eliminar libros.
 
-Consultar disponibilidad por título, autor o género.
+🔎 Consultar disponibilidad por título, autor o género.
 
 📖 Gestión de Préstamos
 
-Registrar préstamos y devoluciones.
+📅 Registrar préstamos y devoluciones.
 
-Limitar a 3 libros por usuario regular.
+⚠️ Límite de 3 libros por usuario regular.
 
 📊 Generación de Reportes
 
-Libros más prestados.
+📌 Libros más prestados.
 
-Usuarios con más préstamos.
+📌 Usuarios con más préstamos.
 
-Libros no prestados en el último año.
+📌 Libros no prestados en el último año.
 
 🛠️ Tecnologías Utilizadas
 
-Java 11
+☕ Java 17
 
-Swing (Interfaz gráfica)
+🖥️ Swing (Interfaz gráfica)
 
-JDBC (Conexión a base de datos)
+🔗 JDBC (Conexión a base de datos)
 
-MySQL (Sistema de gestión de bases de datos)
+🗄️ MySQL (Sistema de gestión de bases de datos)
 
-Maven (Gestión de dependencias)
+📦 Maven (Gestión de dependencias)
 
-GitHub (Control de versiones)
+🌍 GitHub (Control de versiones)
 
 ✨ Contribuciones
 
