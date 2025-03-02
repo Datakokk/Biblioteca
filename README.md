@@ -20,60 +20,146 @@ Este proyecto es una aplicación de escritorio en Java que permite gestionar una
 
 Antes de instalar y ejecutar el proyecto, asegúrate de tener los siguientes requisitos:
 
-✅ Java JDK 11 o superior
-
-✅ MySQL Server
-
-✅ Eclipse IDE (o cualquier otro IDE compatible con proyectos Java Maven)
-
-✅ Maven (para la gestión de dependencias)
-
-✅ Git (opcional, para clonar el repositorio)
+✅ Java JDK 11 o superior✅ MySQL Server✅ Eclipse IDE (o cualquier otro IDE compatible con proyectos Java Maven)✅ Maven (para la gestión de dependencias)✅ Git (opcional, para clonar el repositorio)
 
 ⚙️ Instalación y Configuración
 
-🔹 1️⃣ Clonar el repositorio
-
-Si deseas obtener el código desde GitHub, usa el siguiente comando:
+1️⃣ Clonar el repositorio
 
 git clone https://github.com/tu-usuario/sistema-biblioteca.git
 cd sistema-biblioteca
 
-🔹 2️⃣ Configurar la base de datos MySQL
+2️⃣ Configurar la base de datos MySQL
 
 Ejecuta el siguiente script SQL para crear la base de datos y las tablas necesarias:
 
-CREATE DATABASE biblioteca;
+-- Seleccionar la base de datos
 USE biblioteca;
 
+-- Eliminar triggers existentes
+DROP TRIGGER IF EXISTS actualizar_estado_libro;
+DROP TRIGGER IF EXISTS validar_estado_libro;
+
+-- Eliminar tablas existentes
+DROP TABLE IF EXISTS reportes;
+DROP TABLE IF EXISTS prestamos_express;
+DROP TABLE IF EXISTS prestamos;
+DROP TABLE IF EXISTS reservas;
+DROP TABLE IF EXISTS libros;
+DROP TABLE IF EXISTS usuarios;
+
+-- Crear la tabla usuarios
 CREATE TABLE usuarios (
 id_usuario INT AUTO_INCREMENT PRIMARY KEY,
 nombre VARCHAR(100) NOT NULL,
 email VARCHAR(100) UNIQUE NOT NULL,
-telefono VARCHAR(20),
+telefono VARCHAR(15) NOT NULL,
 rol ENUM('administrador', 'usuario') NOT NULL,
 password VARCHAR(255) NOT NULL
 );
 
+-- Crear la tabla libros
 CREATE TABLE libros (
 id_libro INT AUTO_INCREMENT PRIMARY KEY,
-titulo VARCHAR(200) NOT NULL,
+titulo VARCHAR(150) NOT NULL,
 autor VARCHAR(100) NOT NULL,
-genero VARCHAR(50),
-estado ENUM('disponible', 'prestado') NOT NULL
+genero VARCHAR(50) NOT NULL,
+estado ENUM('disponible', 'prestado') NOT NULL DEFAULT 'disponible'
 );
 
+-- Crear la tabla reservas con ON DELETE CASCADE y ON UPDATE CASCADE
+CREATE TABLE reservas (
+id_reserva INT AUTO_INCREMENT PRIMARY KEY,
+id_usuario INT NOT NULL,
+id_libro INT NOT NULL,
+fecha_reserva DATE NOT NULL,
+estado_reserva ENUM('pendiente', 'cancelada', 'completada') DEFAULT 'pendiente',
+CONSTRAINT fk_reservas_usuarios FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
+ON DELETE CASCADE ON UPDATE CASCADE,
+CONSTRAINT fk_reservas_libros FOREIGN KEY (id_libro) REFERENCES libros(id_libro)
+ON DELETE RESTRICT ON UPDATE CASCADE -- Evita eliminar libros con reservas activas
+);
+
+-- Crear la tabla prestamos con ON DELETE CASCADE y ON UPDATE CASCADE
 CREATE TABLE prestamos (
 id_prestamo INT AUTO_INCREMENT PRIMARY KEY,
-id_usuario INT,
-id_libro INT,
+id_usuario INT NOT NULL,
+id_libro INT NOT NULL,
 fecha_prestamo DATE NOT NULL,
-fecha_devolucion DATE,
-FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario),
-FOREIGN KEY (id_libro) REFERENCES libros(id_libro)
+fecha_devolucion DATE DEFAULT NULL,
+CONSTRAINT fk_prestamos_usuarios FOREIGN KEY (id_usuario) REFERENCES usuarios(id_usuario)
+ON DELETE CASCADE ON UPDATE CASCADE,
+CONSTRAINT fk_prestamos_libros FOREIGN KEY (id_libro) REFERENCES libros(id_libro)
+ON DELETE RESTRICT ON UPDATE CASCADE -- Evita eliminar libros prestados
 );
 
-🔹 3️⃣ Configurar el archivo de conexión JDBC
+-- Crear la tabla prestamos_express con ON DELETE CASCADE y ON UPDATE CASCADE
+CREATE TABLE prestamos_express (
+id_express INT AUTO_INCREMENT PRIMARY KEY,
+id_prestamo INT NOT NULL,
+dias_prestamo INT CHECK (dias_prestamo <= 7),
+CONSTRAINT fk_express_prestamos FOREIGN KEY (id_prestamo) REFERENCES prestamos(id_prestamo)
+ON DELETE CASCADE ON UPDATE CASCADE
+);
+
+-- Crear la tabla reportes (sin claves foráneas, no requiere reglas de cascada)
+CREATE TABLE reportes (
+id_reporte INT AUTO_INCREMENT PRIMARY KEY,
+descripcion TEXT,
+fecha_generacion TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Crear el trigger para actualizar el estado de los libros al registrar devoluciones
+DELIMITER //
+CREATE TRIGGER actualizar_estado_libro
+AFTER UPDATE ON prestamos
+FOR EACH ROW
+BEGIN
+-- Verifica que la fecha_devolucion no sea NULL y que el libro no esté ya marcado como 'disponible'
+IF NEW.fecha_devolucion IS NOT NULL THEN
+UPDATE libros
+SET estado = 'disponible'
+WHERE id_libro = NEW.id_libro AND estado != 'disponible';
+END IF;
+END;
+//
+DELIMITER ;
+
+-- Crear el trigger para validar el estado del libro antes de registrar un préstamo
+DELIMITER //
+CREATE TRIGGER validar_estado_libro
+BEFORE INSERT ON prestamos
+FOR EACH ROW
+BEGIN
+DECLARE libro_estado VARCHAR(50);
+DECLARE libro_existente INT;
+
+    -- Verifica si el libro existe
+    SELECT COUNT(*) INTO libro_existente
+    FROM libros
+    WHERE id_libro = NEW.id_libro;
+
+    IF libro_existente = 0 THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'El libro especificado no existe.';
+    END IF;
+
+    -- Obtiene el estado del libro
+    SELECT estado INTO libro_estado
+    FROM libros
+    WHERE id_libro = NEW.id_libro;
+
+    -- Verifica si el libro está disponible
+    IF libro_estado != 'disponible' THEN
+        SIGNAL SQLSTATE '45000'
+        SET MESSAGE_TEXT = 'El libro no está disponible para préstamo.';
+    END IF;
+
+END;
+//
+DELIMITER ;
+
+3️⃣ Configurar el archivo de conexión JDBC
 
 Edita el archivo config.properties dentro del proyecto y configura la conexión con MySQL:
 
@@ -82,7 +168,7 @@ db.user=root
 db.password=tu_contraseña
 db.driver=com.mysql.cj.jdbc.Driver
 
-🔹 4️⃣ Ejecutar el Proyecto
+4️⃣ Ejecutar el Proyecto
 
 Desde Eclipse o cualquier otro IDE, ejecuta la clase MainFrame.java para iniciar la aplicación con interfaz gráfica.
 Si deseas ejecutarlo desde la terminal, usa:
@@ -120,7 +206,7 @@ mvn exec:java -Dexec.mainClass="com.biblioteca.gui.MainFrame"
 
 🛠️ Tecnologías Utilizadas
 
-☕ Java 17
+☕ Java 11
 
 🖥️ Swing (Interfaz gráfica)
 
@@ -143,4 +229,4 @@ Este proyecto está bajo la licencia MIT. Puedes usarlo y modificarlo libremente
 📩 Contacto
 
 Si tienes alguna duda o sugerencia, no dudes en contactarme:
-📧 tu.email@correo.com
+📧 carloscalvogutierrez@gmx.com
