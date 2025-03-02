@@ -11,6 +11,7 @@ Este proyecto es una aplicación de escritorio en Java que permite gestionar una
 - 🔄 **Gestión de préstamos y devoluciones**.
 - 📅 **Gestión de reservas de libros**.
 - 📊 **Generación de reportes de uso**.
+- 📝 **Registro de operaciones en un archivo de logs (log.txt)**.
 - 🎨 **Interfaz gráfica con Swing** para una experiencia más intuitiva.
 
 ---
@@ -97,6 +98,8 @@ db.url=jdbc:mysql://localhost:3306/biblioteca
 db.user=root
 db.password=tu_contraseña
 db.driver=com.mysql.cj.jdbc.Driver
+log.file.path=log.txt
+log.level=INFO
 ```
 
 ### 4️⃣ Ejecutar el Proyecto
@@ -108,6 +111,24 @@ Si deseas ejecutarlo desde la terminal, usa:
 mvn compile
 mvn exec:java -Dexec.mainClass="com.biblioteca.gui.MainFrame"
 ```
+
+---
+
+## 📝 Registro de Operaciones en Logs
+
+El sistema registra cada operación en el archivo `log.txt`, incluyendo:
+
+- 📄 **Inicio y cierre de sesión**.
+- 📚 **Operaciones sobre libros** (agregar, actualizar, eliminar, préstamos y devoluciones).
+- 📊 **Generación de reportes**.
+
+Para configurar el nivel de logging, puedes editar el archivo `config.properties` y modificar el valor de `log.level`:
+
+```properties
+log.level=INFO
+```
+
+Opciones disponibles: `INFO`, `DEBUG`, `ERROR`.
 
 ---
 
